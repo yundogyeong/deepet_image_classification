@@ -20,8 +20,6 @@ def read_json(p:str) -> dict:
         obj = json.loads(data)
         return obj
 
-MY_JSON = partial(read_json, p=os.path.join(IMAGENET_ROOT, "idx2class.json"))
-
 def write_cache(p:str, data:list) -> None:
     with open(p, 'wb') as file:
         pickle.dump(data, file)
@@ -36,8 +34,8 @@ def read_img(p:str) -> np.ndarray:
 
 
 class TrainDataset(Dataset):
-    idx2class = MY_JSON()
     def __init__(self, root:str, imgsz:int=224):
+        self.idx2class = os.path.join(root, "idx2class.json")
         super().__init__()
         # default size
         if imgsz is None:
@@ -137,9 +135,9 @@ class ValidDataset(Dataset):
         return img_tensor, class_index
 
 
-def get_dataloader(batch_size:int=16, imgsz:int=224, num_workers:int=8) -> Tuple[DataLoader, DataLoader]:
-    _train_dataset = TrainDataset(IMAGENET_ROOT, imgsz)
-    _valid_dataset = ValidDataset(IMAGENET_ROOT, imgsz)
+def get_dataloader(root:str=IMAGENET_ROOT, batch_size:int=16, imgsz:int=224, num_workers:int=8) -> Tuple[DataLoader, DataLoader]:
+    _train_dataset = TrainDataset(root, imgsz)
+    _valid_dataset = ValidDataset(root, imgsz)
     train_loader = DataLoader(_train_dataset, batch_size, True, num_workers=num_workers, persistent_workers=True)
     val_loader = DataLoader(_valid_dataset, batch_size, True, num_workers=num_workers, persistent_workers=True)
     return train_loader, val_loader

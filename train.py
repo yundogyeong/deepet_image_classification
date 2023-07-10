@@ -3,18 +3,23 @@ import argparse
 import shutil
 import torch
 import torch.nn as nn
+from typing import Union
 from torch.optim import SGD, Adam
 from tqdm import tqdm
-from models import VGG
-from utils import get_dataloader, get_current_datetime, AverageMeter, save_dict_as_json
+from models import get_model
+from utils import get_dataloader, get_current_datetime, AverageMeter, save_dict_as_json, get_device
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--model", type=str, default="vgg")
+parser.add_argument("--root", type=str, default="../data/ImageNet_2012_rename")
+parser.add_argument("--device", type=str, default="cpu")
+parser.add_argument("--model", type=str, default="vgg", choices=["vgg", "vit"])
 parser.add_argument("--imgsz", type=int, default=224)
 parser.add_argument("--batch-size", type=int, default=32)
 parser.add_argument("--num-workers", type=int, default=8)
 parser.add_argument("--optimizer", type=str, default='sgd')
 parser.add_argument("--lr", type=float, default=1e-3)
+parser.add_argument("--step", type=int, default=10)
+parser.add_argument("--gamma", type=float, default=0.1)
 parser.add_argument("--epochs", type=int, default=300)
 parser.add_argument("--save_interval", type=int, default=50)
 
@@ -49,8 +54,10 @@ if __name__ == "__main__":
     # 모델 가중치 저장 디렉토리
     SAVE_PATH, PTH_DIR = prepare(opt)
     
+    DEVICE = get_device(opt.device)
+
     # 신경망
-    net = eval(opt.model.upper())().cuda()
+    net = get_model(opt).to(DEVICE)
     
     # 손실함수
     criterion = nn.CrossEntropyLoss()
@@ -60,7 +67,7 @@ if __name__ == "__main__":
     optimizer = optimizer_type(net.parameters(), lr=opt.lr)
     
     # 데이터 파이프라인
-    train_loader, val_loader = get_dataloader(opt.batch_size, opt.imgsz, opt.num_workers)
+    train_loader, val_loader = get_dataloader(opt.root, opt.batch_size, opt.imgsz, opt.num_workers)
     
     for e in range(1, opt.epochs+1):
         pass

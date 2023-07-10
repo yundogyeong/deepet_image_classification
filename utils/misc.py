@@ -5,6 +5,25 @@ import numpy as np
 from typing import Union, Iterable
 from datetime import datetime
 
+def get_device(tag:str) -> None:
+    if tag == "cpu":
+        if torch.cuda.is_available():
+            while True:
+                flag = input("[INFO] cuda is available, switch to cuda? [y/n] : ")
+                if flag == "y":
+                    return torch.device("cuda")
+                elif flag == "n":
+                    return torch.device("cpu")
+                else:
+                    continue
+        return torch.device("cpu")
+    elif tag == "cuda":
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+        else:
+            print("[WARN] cuda is not available !!, return torch.device(\"cpu\")")
+            return torch.device("cpu")
+
 def save_dict_as_json(file_path, data):
     with open(file_path, 'w') as file:
         json.dump(data, file, indent=4)
