@@ -12,7 +12,6 @@ from albumentations.pytorch import ToTensorV2
 from functools import partial
 
 # 데이터셋의 절대경로
-IMAGENET_ROOT = "/workspace/data/ImageNet_2012_rename"
 
 def read_json(p:str) -> dict:
     with open(p, 'r') as f:
@@ -135,7 +134,7 @@ class ValidDataset(Dataset):
         return img_tensor, class_index
 
 
-def get_dataloader(root:str=IMAGENET_ROOT, batch_size:int=16, imgsz:int=224, num_workers:int=8) -> Tuple[DataLoader, DataLoader]:
+def get_dataloader(root:str=None, batch_size:int=16, imgsz:int=224, num_workers:int=8) -> Tuple[DataLoader, DataLoader]:
     _train_dataset = TrainDataset(root, imgsz)
     _valid_dataset = ValidDataset(root, imgsz)
     train_loader = DataLoader(_train_dataset, batch_size, True, num_workers=num_workers, persistent_workers=True)
